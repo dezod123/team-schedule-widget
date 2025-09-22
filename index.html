@@ -94,6 +94,13 @@
     .empty{
       text-align:center; color:var(--muted); padding:36px 8px;
     }
+    
+    .logo{
+        width:36px; height:36px; border-radius:50%;
+        overflow:hidden; display:flex; align-items:center; justify-content:center;
+        background:#f1f5f9;
+    }
+    .logo img{ width:100%; height:100%; object-fit:contain; display:block; }
 
     @media (max-width: 768px){
       .score .n{ font-size:24px; }
@@ -162,27 +169,44 @@
         document.querySelector('.header-title').textContent = `Calendrier — ${team.title}`;
       }
 
-      content.innerHTML = matches.map(m => `
-        <article class="match">
-          <div class="match-head">
-            <div class="hv"><span>📅</span><span>${fmtDateFR(m.date)}</span></div>
-            <div class="hv">
-              ${m.terrain ? `<span>📍 ${m.terrain}</span>` : ''}
-              ${m.heure ? `<span>🕐 ${m.heure}</span>` : ''}
+      content.innerHTML = matches.map(m => {
+        const our = m.ourTeam || { title: team?.title || 'Notre équipe', logo: team?.logo || '' };
+        const opp = m.opponent || { title: m.adversaire || 'Adversaire', logo: '' };
+
+        return `
+            <article class="match">
+            <div class="match-head">
+                <div class="hv"><span>📅</span><span>${fmtDateFR(m.date)}</span></div>
+                <div class="hv">
+                ${m.terrain ? `<span>📍 ${m.terrain}</span>` : ''}
+                ${m.heure ? `<span>🕐 ${m.heure}</span>` : ''}
+                </div>
             </div>
-          </div>
-          <div class="match-body">
-            <div class="row">
-              <div class="team"><div class="name">${team?.title || 'Notre équipe'}</div></div>
-              ${scoreHtml(m)}
-              <div class="team" style="justify-content:flex-end"><div class="name" style="text-align:right">${m.adversaire || 'Adversaire'}</div></div>
+            <div class="match-body">
+                <div class="row">
+                <div class="team">
+                    <div class="logo">
+                    ${our.logo ? `<img src="${our.logo}" alt="${our.title}" width="36" height="36" loading="lazy">` : '⚽'}
+                    </div>
+                    <div class="name">${our.title}</div>
+                </div>
+
+                ${scoreHtml(m)}
+
+                <div class="team" style="justify-content:flex-end">
+                    <div class="name" style="text-align:right">${opp.title}</div>
+                    <div class="logo">
+                    ${opp.logo ? `<img src="${opp.logo}" alt="${opp.title}" width="36" height="36" loading="lazy">` : '⚽'}
+                    </div>
+                </div>
+                </div>
+                <div class="status-wrap">
+                <span class="badge ${badgeClass(m.status)}">${badgeLabel(m.status, m.resultat)}</span>
+                </div>
             </div>
-            <div class="status-wrap">
-              <span class="badge ${badgeClass(m.status)}">${badgeLabel(m.status, m.resultat)}</span>
-            </div>
-          </div>
-        </article>
-      `).join('');
+            </article>
+        `;
+        }).join('');
     }
 
     // Listen for Wix
